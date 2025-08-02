@@ -32,9 +32,15 @@ def start_signup(email):
 
     options = uc.ChromeOptions()
     options.add_argument("--headless")
-    driver = uc.Chrome(options=options)
+    # Disable sandboxing for headless mode (optional, helps on some systems)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
     try:
+        # Initialize undetected-chromedriver
+        logger.info("Initializing Chrome driver...")
+        driver = uc.Chrome(options=options, use_subprocess=True)
+        
         logger.info(f"Navigating to GitHub signup for {email}")
         driver.get("https://github.com/signup")
         wait = WebDriverWait(driver, 10)
@@ -60,4 +66,7 @@ def start_signup(email):
         raise
 
     finally:
-        driver.quit()
+        try:
+            driver.quit()
+        except:
+            logger.warning("Failed to close driver, but continuing...")
