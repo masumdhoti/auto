@@ -32,12 +32,11 @@ def start_signup(email):
 
     options = uc.ChromeOptions()
     options.add_argument("--headless")
-    # Disable sandboxing for headless mode (optional, helps on some systems)
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
+    driver = None  # Initialize driver as None to avoid reference errors
     try:
-        # Initialize undetected-chromedriver
         logger.info("Initializing Chrome driver...")
         driver = uc.Chrome(options=options, use_subprocess=True)
         
@@ -62,11 +61,17 @@ def start_signup(email):
 
     except Exception as e:
         logger.error(f"Error during signup for {email}: {str(e)}")
-        driver.save_screenshot("signup_error.png")  # Save screenshot for debugging
+        if driver:
+            try:
+                driver.save_screenshot("signup_error.png")  # Save screenshot only if driver exists
+            except Exception as screenshot_error:
+                logger.warning(f"Failed to save screenshot: {str(screenshot_error)}")
         raise
 
     finally:
-        try:
-            driver.quit()
-        except:
-            logger.warning("Failed to close driver, but continuing...")
+        if driver:  # Only attempt to quit if driver was initialized
+            try:
+                driver.quit()
+                logger.info("Chrome driver closed successfully")
+            except Exception as quit_error:
+                logger.warning(f"Failed to close driver: {str(quit_error)}")
