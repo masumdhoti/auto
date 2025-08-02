@@ -35,7 +35,12 @@ def start_signup(email):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    driver = None  # Initialize driver as None to avoid reference errors
+    # Explicitly set Chrome binary location (uncomment and adjust for your system)
+    # Windows example: options.binary_location = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    # Linux example: options.binary_location = "/usr/bin/google-chrome"
+    # macOS example: options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+    driver = None
     try:
         logger.info("Initializing Chrome driver...")
         driver = uc.Chrome(options=options, use_subprocess=True)
@@ -63,13 +68,13 @@ def start_signup(email):
         logger.error(f"Error during signup for {email}: {str(e)}")
         if driver:
             try:
-                driver.save_screenshot("signup_error.png")  # Save screenshot only if driver exists
+                driver.save_screenshot("signup_error.png")
             except Exception as screenshot_error:
                 logger.warning(f"Failed to save screenshot: {str(screenshot_error)}")
         raise
 
     finally:
-        if driver:  # Only attempt to quit if driver was initialized
+        if driver:
             try:
                 driver.quit()
                 logger.info("Chrome driver closed successfully")
